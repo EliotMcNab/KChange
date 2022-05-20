@@ -7,5 +7,5 @@ interface Informer<T>{
 class Display<T>(
     parent: Change<T>
 ) : EvolvedChange<T>(parent), Informer<T> {
-    override fun inform(list: List<T>) = println(list)
+    override fun inform(list: List<T>) { println(list) }
 }

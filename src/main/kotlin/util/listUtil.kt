@@ -122,12 +122,12 @@ private fun <T> findFirstOrLast(
     comparator: Comparator<T>,
     findLast: Boolean
 ): List<Int> {
-    val comparator = ListComparator(comparator, 0) as Comparator<List<Any?>>
+    val listComparator = ListComparator(comparator, 0) as Comparator<List<Any?>>
     val resultIndexes = buildList(toFind.size) {for (index in toFind.indices) add(-1)}.toMutableList()
-    val wrappedFind = toFind.wrapIndexes().sortedWith(comparator)
+    val wrappedFind = toFind.wrapIndexes().sortedWith(listComparator)
 
     for (index in list.indices) {
-        val foundIndex = wrappedFind.binarySearch(listOf(list[index]), comparator)
+        val foundIndex = wrappedFind.binarySearch(listOf(list[index]), listComparator)
         if (foundIndex >= 0) {
             val indexInResult = wrappedFind[foundIndex][1] as Int
             val isValidIndex = resultIndexes[indexInResult] < 0 || index < resultIndexes[indexInResult] != findLast
@@ -218,6 +218,18 @@ fun <T> List<T>.setLast(
     val found = findLast(keys, comparator)
 
     for (index in found.indices) if (found[index] >= 0) replaced[found[index]] = replacingMap[keys[index]]!!
+
+    return replaced
+}
+
+fun <T> List<T>.setAt(
+    indexMap: Map<Int, T>
+): List<T> {
+    val replaced = toMutableList()
+    val indexes = indexMap.keys
+    val errorMessage = {index: Int -> "Cannot set value at index $index in list of size $size"}
+
+    for (index in indexes) require(index in indices) {errorMessage(index)}.also { replaced[index] = indexMap[index]!! }
 
     return replaced
 }

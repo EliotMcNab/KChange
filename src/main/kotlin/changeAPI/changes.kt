@@ -180,6 +180,18 @@ open class EvolvedChange<T> private constructor(
 
     override fun setLast(comparator: Comparator<T>, replacingMap: Map<T, T>): Change<T> =
         SetLast(replacingMap, comparator, this)
+
+    override fun setAt(vararg pairs: Pair<Int, T>): Change<T> =
+        setAt(mapOf(*pairs))
+    override fun setAt(indexMap: Map<Int, T>): Change<T> =
+        SetAt(indexMap, this)
+
+    // ORDERING
+    override fun sorted(comparator: Comparator<T>): Change<T> =
+        Sorted(comparator, this)
+
+    override fun unique(comparator: Comparator<T>): Change<T> =
+        Unique(comparator, this)
 }
 
 sealed class PrimitiveChange<T>(
@@ -332,6 +344,25 @@ sealed class PrimitiveChange<T>(
 
     override fun setLast(replacingMap: Map<T, T>): PrimitiveChange<T> =
         PrimitiveAdapter(this.comparator, this, SetLast(replacingMap, comparator, this))
+
+    override fun setAt(vararg pairs: Pair<Int, T>): PrimitiveChange<T> =
+        setAt(mapOf(*pairs))
+
+    override fun setAt(indexMap: Map<Int, T>): PrimitiveChange<T> =
+        PrimitiveAdapter(this.comparator, this, SetAt(indexMap, this))
+
+    // ORDERING
+    override fun sorted(comparator: Comparator<T>): PrimitiveChange<T> =
+        PrimitiveAdapter(this.comparator, this, Sorted(comparator, this))
+
+    override fun sorted(): PrimitiveChange<T> =
+        sorted(comparator)
+
+    override fun unique(comparator: Comparator<T>): PrimitiveChange<T> =
+        PrimitiveAdapter(this.comparator, this, Unique(comparator, this))
+
+    override fun unique(): PrimitiveChange<T> =
+        unique(comparator)
 }
 
 data class ByteChange(

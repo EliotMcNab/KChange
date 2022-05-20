@@ -2,22 +2,27 @@ import changeAPI.Change
 import java.util.Random
 
 fun main() {
-
     val rand = Random()
-    val arraySize = 50
-    val changeSize = 10
-    val randomRange = 10
+    val arraySize = 10
 
-    val values = buildList { for (i in 0 until arraySize) add(rand.nextInt(randomRange)) }
-    val toRemove = buildList { for (i in 0 until changeSize) add(rand.nextInt(randomRange))}
+    val characters = buildList { for (index in 0 until arraySize) add(rand.nextInt(97, 122).toChar()) }
 
-    val start = System.currentTimeMillis()
     val change =
-        Change.of(values)
-            .removeFirst(toRemove)
-            .rollbackTo(5)
+        Change.of(characters)
+            .setAt(
+                0 to 'a',
+                1 to 'b',
+                2 to 'c'
+            )
+            .setAll(
+                'a' to 'A',
+                'b' to 'B',
+                'c' to 'C'
+            )
+            .sorted()
+            .unique()
             .apply()
-    val stop = System.currentTimeMillis()
 
-    println(stop - start)
+    println(characters)
+    println(change)
 }

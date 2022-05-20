@@ -3,6 +3,8 @@ package changeAPI
 import util.*
 import java.util.function.Predicate
 
+// TODO: update equals method in data class so they don't take parent into account ?
+
 interface Effect<T>{
     fun applyTo(list: List<T>): List<T>
 }
@@ -31,11 +33,11 @@ data class Add<T>(
 
 abstract class RemoveBase<T>(
     protected open val toRemove: List<T> = emptyList(),
-    protected open val comparator: Comparator<T>? = null,
+    override val comparator: Comparator<T>? = null,
     protected open val removalIndexes: List<Int> = emptyList(),
     protected open val filter: Predicate<T>? = null,
     parent: Change<T>
-) : EvolvedChange<T>(parent), Effect<T>
+) : ComparingBase<T>(comparator, parent)
 
 open class RemoveAll<T>(
     override val toRemove: List<T>,
@@ -82,11 +84,11 @@ data class RemoveIf<T>(
 
 abstract class RetainBase<T>(
     protected open val toRetain: List<T> = emptyList(),
-    protected open val comparator: Comparator<T>? = null,
+    override val comparator: Comparator<T>? = null,
     protected open val retainedIndexes: List<Int> = emptyList(),
     protected open val filter: Predicate<T>? = null,
     parent: Change<T>
-) : EvolvedChange<T>(parent), Effect<T>
+) : ComparingBase<T>(comparator, parent)
 
 data class RetainAll<T>(
     override val toRetain: List<T>,
@@ -132,11 +134,10 @@ data class RetainAt<T>(
 
 abstract class SetBase<T>(
     protected open val replacingMap: Map<T, T>? = null,
-    protected open val replacingValue: T? = null,
-    protected open val comparator: Comparator<T>? = null,
-    protected open val replacingIndexes: List<Int> = emptyList(),
+    override val comparator: Comparator<T>? = null,
+    protected open val indexMap: Map<Int, T>? = null,
     parent: Change<T>
-) : EvolvedChange<T>(parent), Effect<T>
+) : ComparingBase<T>(comparator, parent)
 
 data class SetAll<T>(
     override val replacingMap: Map<T, T>,
@@ -165,3 +166,32 @@ data class SetLast<T>(
     override fun toString() = "SetLast(toReplace=${replacingMap.keys}, replacing=${replacingMap.values}, comparator=$comparator)"
 }
 
+data class SetAt<T>(
+    override val indexMap: Map<Int, T>,
+    val parent: Change<T>
+) : SetBase<T>(indexMap = indexMap, parent = parent) {
+    override fun applyTo(list: List<T>) = list.setAt(indexMap)
+    override fun toString() = "SetAt(indexes=${indexMap.keys}, replacing=${indexMap.values})"
+}
+
+abstract class ComparingBase<T>(
+    protected open val comparator: Comparator<T>? = null,
+    parent: Change<T>
+) : EvolvedChange<T>(parent), Effect<T>
+
+data class Unique<T>(
+    override val comparator: Comparator<T>,
+    val parent: Change<T>
+) : ComparingBase<T>(comparator, parent) {
+    //TODO: implement custom method which retains elements based on the given comparator
+    override fun applyTo(list: List<T>) = list.union(list).toList()
+    override fun toString() = "Unique(comparator=$comparator)"
+}
+
+data class Sorted<T>(
+    override val comparator: Comparator<T>,
+    val parent: Change<T>
+) : ComparingBase<T>(comparator, parent) {
+    override fun applyTo(list: List<T>) = list.sortedWith(comparator)
+    override fun toString() = "Unique(comparator=$comparator)"
+}

@@ -36,6 +36,11 @@ interface ArrayOperations<T>{
     fun setFirst(comparator: Comparator<T>, replacingMap: Map<T, T>): Change<T>
     fun setLast(comparator: Comparator<T>, vararg pairs: Pair<T, T>): Change<T>
     fun setLast(comparator: Comparator<T>, replacingMap: Map<T, T>): Change<T>
+    fun setAt(vararg pairs: Pair<Int, T>): Change<T>
+    fun setAt(indexMap: Map<Int, T>): Change<T>
+    // ordering
+    fun sorted(comparator: Comparator<T>): Change<T>
+    fun unique(comparator: Comparator<T>): Change<T>
 }
 
 interface PrimitiveTypeOperations<T> : ArrayOperations<T> {
@@ -60,4 +65,7 @@ interface PrimitiveTypeOperations<T> : ArrayOperations<T> {
     fun setFirst(replacingMap: Map<T, T>): PrimitiveChange<T>
     fun setLast(vararg pairs: Pair<T, T>): PrimitiveChange<T>
     fun setLast(replacingMap: Map<T, T>): PrimitiveChange<T>
+    // ordering
+    fun sorted(): PrimitiveChange<T>
+    fun unique(): PrimitiveChange<T>
 }
