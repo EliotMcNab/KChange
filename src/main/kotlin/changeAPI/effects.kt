@@ -144,6 +144,7 @@ data class SetAll<T>(
     val parent: Change<T>
 ) : SetBase<T>(replacingMap = replacingMap, comparator = comparator, parent = parent) {
     override fun applyTo(list: List<T>) = list.setAll(replacingMap, comparator)
+    override fun toString() = "SetAll(toReplace=${replacingMap.keys}, replacing=${replacingMap.values}, comparator=$comparator)"
 }
 
 data class SetFirst<T>(
@@ -152,5 +153,15 @@ data class SetFirst<T>(
     val parent: Change<T>
 ) : SetBase<T>(replacingMap = replacingMap, comparator = comparator, parent = parent) {
     override fun applyTo(list: List<T>) = list.setFirst(replacingMap, comparator)
+    override fun toString() = "SetFirst(toReplace=${replacingMap.keys}, replacing=${replacingMap.values}, comparator=$comparator)"
+}
+
+data class SetLast<T>(
+    override val replacingMap: Map<T, T>,
+    override val comparator: Comparator<T>,
+    val parent: Change<T>
+) : SetBase<T>(replacingMap = replacingMap, comparator = comparator, parent = parent) {
+    override fun applyTo(list: List<T>) = list.setLast(replacingMap, comparator)
+    override fun toString() = "SetLast(toReplace=${replacingMap.keys}, replacing=${replacingMap.values}, comparator=$comparator)"
 }
 

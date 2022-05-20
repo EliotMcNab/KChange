@@ -7,7 +7,7 @@ sealed class Change<T>(
     private val list: List<T> = emptyList(),
     private val parent: Change<T>? = null,
 ) : Collection<Change<T>> {
-    val generation: Int = (parent?.generation?.plus(1)) ?: 0
+    private val generation: Int = (parent?.generation?.plus(1)) ?: 0
 
     companion object {
         fun of(vararg bytes: Byte)     = ByteChange(bytes.toList())
@@ -34,10 +34,10 @@ sealed class Change<T>(
     fun rollback() = parent ?: this
 
     fun rollback(count: Int): Change<T> {
-        if (count < 0)
-            throw NonexistentChangeException("Rollback amount must be a positive integer")
-        if (generation - count < 0)
-            throw NonexistentChangeException("Can only rollback $generation generations. Desired rollback: $count generations")
+        require(count >= 0)
+            { throw NonexistentChangeException("Rollback amount must be a positive integer") }
+        require(generation - count >= 0)
+            { throw NonexistentChangeException("Can only rollback $generation generations. Desired rollback: $count generations")}
 
         var currentChange = this
         for (generation in 0 until count) currentChange = currentChange.parent!!
@@ -46,10 +46,10 @@ sealed class Change<T>(
     }
 
     fun rollbackTo(generation: Int): Change<T> {
-        if (generation < 0)
-            throw NonexistentChangeException("Cannot rollback to change of generation inferior to 0")
-        if (generation >= this.generation)
-            throw NonexistentChangeException("Cannot rollback to a change of generation superior or equal to the current change")
+        require(generation >= 0)
+            { throw NonexistentChangeException("Cannot rollback to change of generation inferior to 0") }
+        require(generation < this.generation)
+            { throw NonexistentChangeException("Target rollback generation $generation should be inferior to current generation ${this.generation}") }
 
         var currentChange = this
         while (currentChange.generation != generation) currentChange = currentChange.parent!!
@@ -91,28 +91,95 @@ open class EvolvedChange<T> private constructor(
     constructor(list: List<T> = emptyList()) : this(list, null)
     protected constructor(parent: Change<T>) : this(emptyList(), parent)
 
-    fun display() = Display(this)
+    // ADDING
+    override fun add(element: T) : Change<T> =
+        Add(listOf(element), this)
 
-    // add
-    override fun add(element: T)                                                = Add(listOf(element), this)
-    override fun addAll(vararg elements: T)                                     = Add(elements.toList(), this)
-    // remove
-    override fun removeAll(comparator: Comparator<T>, vararg elements: T)       = RemoveAll(elements.toList(), comparator, this)
-    override fun removeFirst(comparator: Comparator<T>, vararg elements: T)    = RemoveFirst(elements.toList(), comparator, this)
-    override fun removeLast(comparator: Comparator<T>, vararg elements: T)     = RemoveLast(elements.toList(), comparator, this)
-    override fun removeAt(vararg indexes: Int)                                 = RemoveAt(indexes.toList(), this)
-    override fun removeIf(filter: Predicate<T>)                                = RemoveIf(filter, this)
-    override fun removeIf(filter: (T) -> Boolean)                              = removeIf(Predicate(filter))
-    // retain
-    override fun retainAll(comparator: Comparator<T>, vararg elements: T)      = RetainAll(elements.toList(), comparator, this)
-    override fun retainFirst(comparator: Comparator<T>, vararg elements: T)    = RetainFirst(elements.toList(), comparator, this)
-    override fun retainLast(comparator: Comparator<T>, vararg elements: T)     = RetainLast(elements.toList(), comparator, this)
-    override fun retainAt(vararg indexes: Int)                                 = RetainAt(indexes.toList(), this)
-    override fun retainIf(filter: Predicate<T>)                                = RetainIf(filter, this)
-    override fun retainIf(filter: (T) -> Boolean)                              = retainIf(Predicate(filter))
-    // setting
-    override fun setAll(comparator: Comparator<T>, vararg pairs: Pair<T, T>)   = SetAll(mapOf(*pairs), comparator, this)
-    override fun setFirst(comparator: Comparator<T>, vararg pairs: Pair<T, T>) = SetFirst(mapOf(*pairs), comparator, this)
+    override fun addAll(vararg elements: T): Change<T> =
+        addAll(elements.toList())
+
+    override fun addAll(list: List<T>): Change<T> =
+        Add(list, this)
+
+    // REMOVING
+    override fun removeAll(comparator: Comparator<T>, vararg elements: T): Change<T> =
+        removeAll(comparator, elements.toList())
+
+    override fun removeAll(comparator: Comparator<T>, list: List<T>): Change<T> =
+        RemoveAll(list, comparator, this)
+
+    override fun removeFirst(comparator: Comparator<T>, vararg elements: T): Change<T> =
+        removeFirst(comparator, elements.toList())
+
+    override fun removeFirst(comparator: Comparator<T>, list: List<T>): Change<T> =
+        RemoveFirst(list, comparator, this)
+
+    override fun removeLast(comparator: Comparator<T>, vararg elements: T): Change<T> =
+        removeLast(comparator, elements.toList())
+
+    override fun removeLast(comparator: Comparator<T>, list: List<T>): Change<T> =
+        RemoveLast(list, comparator, this)
+
+    override fun removeAt(vararg indexes: Int): Change<T> =
+        removeAt(indexes.toList())
+
+    override fun removeAt(list: List<Int>): Change<T> =
+        RemoveAt(list, this)
+
+    override fun removeIf(filter: Predicate<T>): Change<T> =
+        RemoveIf(filter, this)
+
+    override fun removeIf(filter: (T) -> Boolean): Change<T> =
+        removeIf(Predicate(filter))
+
+    // RETAINING
+    override fun retainAll(comparator: Comparator<T>, vararg elements: T): Change<T> =
+        retainAll(comparator, elements.toList())
+
+    override fun retainAll(comparator: Comparator<T>, list: List<T>): Change<T> =
+        RetainAll(list, comparator, this)
+    override fun retainFirst(comparator: Comparator<T>, vararg elements: T): Change<T> =
+        retainFirst(comparator, elements.toList())
+
+    override fun retainFirst(comparator: Comparator<T>, list: List<T>): Change<T> =
+        RetainFirst(list, comparator, this)
+
+    override fun retainLast(comparator: Comparator<T>, vararg elements: T): Change<T> =
+        retainLast(comparator, elements.toList())
+
+    override fun retainLast(comparator: Comparator<T>, list: List<T>): Change<T> =
+        RetainLast(list, comparator, this)
+
+    override fun retainAt(vararg indexes: Int): Change<T> =
+        retainAt(indexes.toList())
+
+    override fun retainAt(list: List<Int>): Change<T> =
+        RetainAt(list, this)
+
+    override fun retainIf(filter: Predicate<T>): Change<T> =
+        RetainIf(filter, this)
+
+    override fun retainIf(filter: (T) -> Boolean): Change<T> =
+        retainIf(Predicate(filter))
+
+    // SETTING
+    override fun setAll(comparator: Comparator<T>, vararg pairs: Pair<T, T>): Change<T> =
+        setAll(comparator, mapOf(*pairs))
+
+    override fun setAll(comparator: Comparator<T>, replacingMap: Map<T, T>): Change<T> =
+        SetAll(replacingMap, comparator, this)
+
+    override fun setFirst(comparator: Comparator<T>, vararg pairs: Pair<T, T>): Change<T> =
+        setFirst(comparator, mapOf(*pairs))
+
+    override fun setFirst(comparator: Comparator<T>, replacingMap: Map<T, T>): Change<T> =
+        SetFirst(replacingMap, comparator, this)
+
+    override fun setLast(comparator: Comparator<T>, vararg pairs: Pair<T, T>): Change<T> =
+        setLast(comparator, mapOf(*pairs))
+
+    override fun setLast(comparator: Comparator<T>, replacingMap: Map<T, T>): Change<T> =
+        SetLast(replacingMap, comparator, this)
 }
 
 sealed class PrimitiveChange<T>(
@@ -121,35 +188,150 @@ sealed class PrimitiveChange<T>(
     private val comparator: Comparator<T>
 ) : Change<T>(list, parent), PrimitiveTypeOperations<T> {
 
-    // add
-    override fun add(element: T)                                               = PrimitiveAdapter(this.comparator, this, Add(listOf(element), this))
-    override fun addAll(vararg elements: T)                                    = PrimitiveAdapter(this.comparator, this, Add(elements.toList(), this))
-    // remove
-    override fun removeAll(comparator: Comparator<T>, vararg elements: T)      = PrimitiveAdapter(this.comparator, this, RemoveAll(elements.toList(), comparator, this))
-    override fun removeAll(vararg elements: T)                                 = PrimitiveAdapter(this.comparator, this, RemoveAll(elements.toList(), comparator, this))
-    fun removeAll(list: List<T>) = PrimitiveAdapter(this.comparator, this, RemoveAll(list, comparator, this))
-    override fun removeFirst(comparator: Comparator<T>, vararg elements: T)    = PrimitiveAdapter(this.comparator, this, RemoveFirst(elements.toList(), comparator, this))
-    override fun removeFirst(vararg elements: T)                               = PrimitiveAdapter(this.comparator, this, RemoveFirst(elements.toList(), comparator, this))
-    override fun removeLast(comparator: Comparator<T>, vararg elements: T)     = PrimitiveAdapter(this.comparator, this, RemoveLast(elements.toList(), comparator, this))
-    override fun removeLast(vararg elements: T)                                = PrimitiveAdapter(this.comparator, this, RemoveLast(elements.toList(), comparator, this))
-    override fun removeAt(vararg indexes: Int)                                 = PrimitiveAdapter(this.comparator, this, RemoveAt(indexes.toList(), this))
-    override fun removeIf(filter: Predicate<T>)                                = PrimitiveAdapter(this.comparator, this, RemoveIf(filter, this))
-    override fun removeIf(filter: (T) -> Boolean)                              = removeIf(Predicate(filter))
-    // retain
-    override fun retainAll(comparator: Comparator<T>, vararg elements: T)      = PrimitiveAdapter(this.comparator, this, RetainAll(elements.toList(), comparator, this))
-    override fun retainAll(vararg elements: T): PrimitiveChange<T>             = PrimitiveAdapter(this.comparator, this, RetainAll(elements.toList(), comparator, this))
-    override fun retainFirst(comparator: Comparator<T>, vararg elements: T)    = PrimitiveAdapter(this.comparator, this, RetainFirst(elements.toList(), comparator, this))
-    override fun retainFirst(vararg elements: T)                               = PrimitiveAdapter(this.comparator, this, RetainFirst(elements.toList(), comparator, this))
-    override fun retainLast(comparator: Comparator<T>, vararg elements: T)     = PrimitiveAdapter(this.comparator, this, RetainLast(elements.toList(), comparator, this))
-    override fun retainLast(vararg elements: T)                                = PrimitiveAdapter(this.comparator, this, RetainLast(elements.toList(), comparator, this))
-    override fun retainAt(vararg indexes: Int)                                 = PrimitiveAdapter(this.comparator, this, RetainAt(indexes.toList(), this))
-    override fun retainIf(filter: Predicate<T>)                                = PrimitiveAdapter(this.comparator, this, RetainIf(filter, this))
-    override fun retainIf(filter: (T) -> Boolean)                              = retainIf(Predicate(filter))
-    // setting
-    override fun setAll(comparator: Comparator<T>, vararg pairs: Pair<T, T>)   = PrimitiveAdapter(this.comparator, this, SetAll(mapOf(*pairs), comparator, this))
-    override fun setAll(vararg pairs: Pair<T, T>)                              = PrimitiveAdapter(this.comparator, this, SetAll(mapOf(*pairs), comparator, this))
-    override fun setFirst(comparator: Comparator<T>, vararg pairs: Pair<T, T>) = PrimitiveAdapter(this.comparator, this, SetFirst(mapOf(*pairs), comparator, this))
-    override fun setFirst(vararg pairs: Pair<T, T>)                            = PrimitiveAdapter(this.comparator, this, SetFirst(mapOf(*pairs), comparator, this))
+    // ADDING
+    override fun add(element: T): PrimitiveChange<T> =
+        PrimitiveAdapter(this.comparator, this, Add(listOf(element), this))
+
+    override fun addAll(vararg elements: T): PrimitiveChange<T> =
+        addAll(elements.toList())
+
+    override fun addAll(list: List<T>): PrimitiveChange<T> =
+        PrimitiveAdapter(this.comparator, this, Add(list, this))
+
+    // REMOVING
+    override fun removeAll(comparator: Comparator<T>, vararg elements: T): PrimitiveChange<T> =
+        removeAll(comparator, elements.toList())
+
+    override fun removeAll(comparator: Comparator<T>, list: List<T>): PrimitiveChange<T> =
+        PrimitiveAdapter(this.comparator, this, RemoveAll(list, comparator, this))
+
+    override fun removeAll(vararg elements: T): PrimitiveChange<T> =
+        removeAll(elements.toList())
+
+    override fun removeAll(list: List<T>): PrimitiveChange<T> =
+        PrimitiveAdapter(this.comparator, this, RemoveAll(list, comparator, this))
+
+    override fun removeFirst(comparator: Comparator<T>, vararg elements: T): PrimitiveChange<T> =
+        removeFirst(comparator, elements.toList())
+
+    override fun removeFirst(comparator: Comparator<T>, list: List<T>): PrimitiveChange<T> =
+        PrimitiveAdapter(this.comparator, this, RemoveFirst(list, comparator, this))
+
+    override fun removeFirst(vararg elements: T): PrimitiveChange<T> =
+        removeFirst(elements.toList())
+
+    override fun removeFirst(list: List<T>): PrimitiveChange<T> =
+        PrimitiveAdapter(this.comparator, this, RemoveFirst(list, comparator, this))
+
+    override fun removeLast(comparator: Comparator<T>, vararg elements: T): PrimitiveChange<T> =
+        removeLast(comparator, elements.toList())
+
+    override fun removeLast(comparator: Comparator<T>, list: List<T>): PrimitiveChange<T> =
+        PrimitiveAdapter(this.comparator, this, RemoveLast(list, comparator, this))
+
+    override fun removeLast(vararg elements: T): PrimitiveChange<T> =
+        removeLast(elements.toList())
+
+    override fun removeLast(list: List<T>): PrimitiveChange<T> =
+        PrimitiveAdapter(this.comparator, this, RemoveLast(list, comparator, this))
+
+    override fun removeAt(vararg indexes: Int): PrimitiveChange<T> =
+        removeAt(indexes.toList())
+
+    override fun removeAt(list: List<Int>): PrimitiveChange<T> =
+        PrimitiveAdapter(this.comparator, this, RemoveAt(list, this))
+
+    override fun removeIf(filter: Predicate<T>): PrimitiveChange<T> =
+        PrimitiveAdapter(this.comparator, this, RemoveIf(filter, this))
+
+    override fun removeIf(filter: (T) -> Boolean): PrimitiveChange<T> =
+        removeIf(Predicate(filter))
+
+    // RETAINING
+    override fun retainAll(comparator: Comparator<T>, vararg elements: T): PrimitiveChange<T> =
+        retainAll(comparator, elements.toList())
+
+    override fun retainAll(comparator: Comparator<T>, list: List<T>): PrimitiveChange<T> =
+        PrimitiveAdapter(this.comparator, this, RetainAll(list, comparator, this))
+
+    override fun retainAll(vararg elements: T): PrimitiveChange<T> =
+        retainAll(elements.toList())
+
+    override fun retainAll(list: List<T>): PrimitiveChange<T> =
+        PrimitiveAdapter(this.comparator, this, RetainAll(list, comparator, this))
+
+    override fun retainFirst(comparator: Comparator<T>, vararg elements: T): PrimitiveChange<T> =
+        retainFirst(comparator, elements.toList())
+
+    override fun retainFirst(comparator: Comparator<T>, list: List<T>): PrimitiveChange<T> =
+        PrimitiveAdapter(this.comparator, this, RetainFirst(list, comparator, this))
+
+    override fun retainFirst(vararg elements: T): PrimitiveChange<T> =
+        retainFirst(elements.toList())
+
+    override fun retainFirst(list: List<T>): PrimitiveChange<T> =
+        PrimitiveAdapter(this.comparator, this, RetainFirst(list, comparator, this))
+
+    override fun retainLast(comparator: Comparator<T>, vararg elements: T): PrimitiveChange<T> =
+        retainLast(comparator, elements.toList())
+
+    override fun retainLast(comparator: Comparator<T>, list: List<T>): PrimitiveChange<T> =
+        PrimitiveAdapter(this.comparator, this, RetainLast(list, comparator, this))
+
+    override fun retainLast(vararg elements: T): PrimitiveChange<T> =
+        retainLast(elements.toList())
+
+    override fun retainLast(list: List<T>): PrimitiveChange<T> =
+        PrimitiveAdapter(this.comparator, this, RetainLast(list, comparator, this))
+
+    override fun retainAt(vararg indexes: Int): PrimitiveChange<T> =
+        retainAt(indexes.toList())
+
+    override fun retainAt(list: List<Int>): PrimitiveAdapter<T> =
+        PrimitiveAdapter(this.comparator, this, RetainAt(list, this))
+
+    override fun retainIf(filter: Predicate<T>): PrimitiveChange<T> =
+        PrimitiveAdapter(this.comparator, this, RetainIf(filter, this))
+
+    override fun retainIf(filter: (T) -> Boolean): PrimitiveChange<T> =
+        retainIf(Predicate(filter))
+
+    // SETTING
+    override fun setAll(comparator: Comparator<T>, vararg pairs: Pair<T, T>): PrimitiveChange<T> =
+        setAll(comparator, mapOf(*pairs))
+
+    override fun setAll(comparator: Comparator<T>, replacingMap: Map<T, T>): PrimitiveChange<T> =
+        PrimitiveAdapter(this.comparator, this, SetAll(replacingMap, comparator, this))
+
+    override fun setAll(vararg pairs: Pair<T, T>): PrimitiveChange<T> =
+        setAll(mapOf(*pairs))
+
+    override fun setAll(replacingMap: Map<T, T>): PrimitiveChange<T> =
+        PrimitiveAdapter(this.comparator, this, SetAll(replacingMap, comparator, this))
+
+    override fun setFirst(comparator: Comparator<T>, vararg pairs: Pair<T, T>): PrimitiveChange<T> =
+        setFirst(comparator, mapOf(*pairs))
+
+    override fun setFirst(comparator: Comparator<T>, replacingMap: Map<T, T>): PrimitiveChange<T> =
+        PrimitiveAdapter(this.comparator, this, SetFirst(replacingMap, comparator, this))
+
+    override fun setFirst(vararg pairs: Pair<T, T>): PrimitiveChange<T> =
+        setFirst(mapOf(*pairs))
+
+    override fun setFirst(replacingMap: Map<T, T>): PrimitiveChange<T> =
+        PrimitiveAdapter(this.comparator, this, SetFirst(replacingMap, comparator, this))
+
+    override fun setLast(comparator: Comparator<T>, vararg pairs: Pair<T, T>): PrimitiveChange<T> =
+        setLast(comparator, mapOf(*pairs))
+
+    override fun setLast(comparator: Comparator<T>, replacingMap: Map<T, T>): PrimitiveChange<T> =
+        PrimitiveAdapter(this.comparator, this, SetLast(replacingMap, comparator, this))
+
+    override fun setLast(vararg pairs: Pair<T, T>): PrimitiveChange<T> =
+        setLast(mapOf(*pairs))
+
+    override fun setLast(replacingMap: Map<T, T>): PrimitiveChange<T> =
+        PrimitiveAdapter(this.comparator, this, SetLast(replacingMap, comparator, this))
 }
 
 data class ByteChange(

@@ -5,7 +5,6 @@ import java.util.function.Predicate
 import kotlin.Comparator
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
-import kotlin.coroutines.coroutineContext
 
 fun <T> List<T>.wrapIndexes(): List<List<Any?>> {
     val list = this
@@ -203,9 +202,22 @@ fun <T> List<T>.setFirst(
 ): List<T> {
     val replaced = toMutableList()
     val keys = replacingMap.keys.toList()
-    val foundIndexes = findFirst(keys, comparator)
+    val found = findFirst(keys, comparator)
 
-    for (index in foundIndexes.indices) if (foundIndexes[index] >= 0) replaced[foundIndexes[index]] = replacingMap[keys[index]]!!
+    for (index in found.indices) if (found[index] >= 0) replaced[found[index]] = replacingMap[keys[index]]!!
+
+    return replaced
+}
+
+fun <T> List<T>.setLast(
+    replacingMap: Map<T, T>,
+    comparator: Comparator<T>
+): List<T> {
+    val replaced = toMutableList()
+    val keys = replacingMap.keys.toList()
+    val found = findLast(keys, comparator)
+
+    for (index in found.indices) if (found[index] >= 0) replaced[found[index]] = replacingMap[keys[index]]!!
 
     return replaced
 }
