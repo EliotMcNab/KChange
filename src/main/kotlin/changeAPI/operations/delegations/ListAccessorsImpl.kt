@@ -5,7 +5,7 @@ import changeAPI.ListAccessors
 import util.*
 import java.util.function.Predicate
 
-internal class ListAccessorsImpl<T>(
+internal open class ListAccessorsImpl<T>(
     list: List<T>,
     parent: Change<*>?
 ) : Change<T>(list, parent), ListAccessors<T> {

@@ -84,37 +84,20 @@ open class Change<T>(
         return allChange.reversed()
     }
 
-    private fun compartmentalise(changes: List<Change<*>>): List<Pair<Int, Int>> {
-
-        val compartments = arrayListOf<Pair<Int, Int>>()
-
-        var compartmentStart : Int
-        var compartmentStop = changes.size
-
-        for (index in changes.indices.reversed()) {
-            compartmentStart = index
-
-            if (changes[index].typeGeneration == 0) {
-                compartments.add(Pair(compartmentStart + 1, compartmentStop))
-                compartmentStop = compartmentStart
-            }
-        }
-
-        return compartments
-    }
-
     private fun resolve(changes: List<Change<*>>): List<T> {
-        var result = changes.first().list as List<T>
+        var resolved = changes.first().list as List<T>
 
         for (change in changes) when (change) {
-            is Effect<*, *> -> result = (change as Effect<T, T>).applyTo(result)
+            is Effect<*, *> -> resolved = (change as Effect<T, T>).applyTo(resolved)
             else            -> continue
         }
 
-        return result
+        result = resolved
+
+        return resolved
     }
 
-    fun apply(): List<T> = resolve(joinChanges())
+    fun apply(): List<T> = if (this::result.isInitialized) result else resolve(joinChanges())
 
     override val size: Int get() = TODO("Not yet implemented")
 
