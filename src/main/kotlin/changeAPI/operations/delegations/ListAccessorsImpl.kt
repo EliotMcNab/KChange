@@ -7,7 +7,7 @@ import java.util.function.Predicate
 
 internal class ListAccessorsImpl<T>(
     list: List<T>,
-    parent: Change<T>?
+    parent: Change<*>?
 ) : Change<T>(list, parent), ListAccessors<T> {
     // FINDING
     override fun findAll(comparator: Comparator<T>, vararg toFind: T) =

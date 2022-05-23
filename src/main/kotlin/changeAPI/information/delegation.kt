@@ -1,10 +1,7 @@
-package changeAPI
+package changeAPI.information
 
 import changeAPI.changes.Change
 import changeAPI.changes.ListChange
-import changeAPI.information.ListInformation
-import changeAPI.information.Operator
-import changeAPI.information.PrimitiveInformation
 import util.differenceOf
 import util.productOf
 import util.quotientOf
@@ -12,7 +9,7 @@ import util.sumOf
 
 internal class ListInformationImpl<T>(
     list: List<T>,
-    parent: Change<T>?
+    parent: Change<*>?
 ) : Change<T>(list, parent), ListInformation<T> {
     override fun sumOf(operator: Operator<T>): T = apply().sumOf(operator)
 
@@ -26,7 +23,7 @@ internal class ListInformationImpl<T>(
 
 internal class PrimitiveInformationImpl<T>(
     list: List<T>,
-    parent: Change<T>?,
+    parent: Change<*>?,
     private val operator: Operator<T>
 ) : ListChange<T>(list, parent), PrimitiveInformation<T> {
     override fun sumOf(): T = apply().sumOf(operator)

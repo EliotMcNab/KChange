@@ -8,6 +8,7 @@ fun main() {
 
     val change =
         Change.of("hello")
+            .add('a')
             .unique()
             .sorted()
             .apply()

@@ -1,9 +1,8 @@
 package changeAPI.changes
 
 import changeAPI.*
-import changeAPI.ListInformationImpl
-import changeAPI.PrimitiveInformationImpl
-import changeAPI.actions.Action
+import changeAPI.information.ListInformationImpl
+import changeAPI.information.PrimitiveInformationImpl
 import changeAPI.information.*
 import changeAPI.operations.delegations.ListAccessorsImpl
 import changeAPI.operations.delegations.PrimitiveAccessorsImpl
@@ -11,9 +10,12 @@ import comparisons.*
 
 open class Change<T>(
     private val list: List<T>,
-    private val parent: Change<T>?,
+    private val parent: Change<*>?,
+    typeChange: Boolean = false
 ) : Collection<Change<T>> {
     private val generation: Int = (parent?.generation?.plus(1)) ?: 0
+    private val typeGeneration: Int = if (!typeChange) (parent?.generation?.plus(1)) ?: 0  else 0
+
     private lateinit var result: List<T>
 
     companion object {
@@ -40,34 +42,80 @@ open class Change<T>(
         fun <T> of()                   = EvolvedChange<T>()
     }
 
-    fun rollback() = parent ?: this
+    fun rollback(): Change<T> {
+        val errorMessage = "Impossible to rollback, there exists no preceding change of similar type"
+        require(typeGeneration > 0) {throw NoneExistentChangeException(errorMessage)}
+        return parent!! as Change<T>
+    }
 
     fun rollback(count: Int): Change<T> {
         require(count >= 0)
-            { throw NonexistentChangeException("Rollback amount must be a positive integer") }
-        require(generation - count >= 0)
-            { throw NonexistentChangeException("Can only rollback $generation generations. Desired rollback: $count generations") }
+            { throw NoneExistentChangeException("Rollback amount must be a positive integer") }
+        require(typeGeneration - count >= 0)
+            { throw NoneExistentChangeException("Can only rollback $generation generations. Desired rollback: $count generations") }
 
         var currentChange = this
-        for (generation in 0 until count) currentChange = currentChange.parent!!
+        for (generation in 0 until count) currentChange = currentChange.parent!! as Change<T>
 
         return currentChange
     }
 
     fun rollbackTo(generation: Int): Change<T> {
+        val error1 = "Cannot rollback to change of generation inferior to 0"
+        val error2 = "Target rollback generation $generation should be inferior to current generation $typeGeneration"
+
         require(generation >= 0)
-            { throw NonexistentChangeException("Cannot rollback to change of generation inferior to 0") }
-        require(generation < this.generation)
-            { throw NonexistentChangeException("Target rollback generation $generation should be inferior to current generation ${this.generation}") }
+            { throw NoneExistentChangeException(error1) }
+        require(generation < typeGeneration)
+            { throw NoneExistentChangeException(error2) }
 
         var currentChange = this
-        while (currentChange.generation != generation) currentChange = currentChange.parent!!
+        for (rollBack in 0 until (typeGeneration - generation)) currentChange = currentChange.parent!! as Change<T>
 
         return currentChange
     }
 
+    private fun joinChanges(): List<Change<*>> {
+        val allChange = arrayListOf<Change<*>>()
+
+        allChange.add(this)
+        for (currentGeneration in 0 until generation) allChange.add(allChange.last().parent!!)
+
+        return allChange.reversed()
+    }
+
+    private fun compartmentalise(changes: List<Change<*>>): List<Pair<Int, Int>> {
+
+        val compartments = arrayListOf<Pair<Int, Int>>()
+
+        var compartmentStart : Int
+        var compartmentStop = changes.size
+
+        for (index in changes.indices.reversed()) {
+            compartmentStart = index
+
+            if (changes[index].typeGeneration == 0) {
+                compartments.add(Pair(compartmentStart + 1, compartmentStop))
+                compartmentStop = compartmentStart
+            }
+        }
+
+        return compartments
+    }
+
+    private fun resolve(changes: List<Change<*>>, baseList: List<*>): List<T> {
+        var result = baseList as List<T>
+
+        for (change in changes) when (change) {
+            is Effect<*> -> result = (change as Effect<T>).applyTo(result)
+            else         -> continue
+        }
+
+        return result
+    }
+
     fun apply(): List<T> {
-        if (this::result.isInitialized) return result
+        /*if (this::result.isInitialized) return result
 
         val changes = ArrayList<Change<T>>(generation)
         changes.add(this)
@@ -85,7 +133,17 @@ open class Change<T>(
 
         result = list
 
-        return result
+        return result*/
+
+        val changes = joinChanges()
+        val compartments = compartmentalise(changes)
+
+        var baseList = changes.first().list
+        for (range in compartments) {
+            baseList = resolve(changes.subList(range.first, range.second), baseList)
+        }
+
+        return baseList as List<T>
     }
 
     override val size: Int get() = TODO("Not yet implemented")
@@ -98,21 +156,21 @@ open class Change<T>(
 
 abstract class ListChange<T> (
     list: List<T>,
-    parent: Change<T>?
+    parent: Change<*>?
 ) : Change<T>(list, parent),
     ListAccessors<T> by ListAccessorsImpl(list, parent),
     ListInformation<T> by ListInformationImpl(list, parent)
 
 open class EvolvedChange<T> private constructor(
     list: List<T> = emptyList(),
-    parent: Change<T>? = null
+    parent: Change<*>? = null
 ) : EvolvedOperationsImpl<T>(list, parent) {
     constructor(list: List<T> = emptyList()) : this(list, null)
-    protected constructor(parent: Change<T>) : this(emptyList(), parent)
+    protected constructor(parent: Change<*>) : this(emptyList(), parent)
 }
 open class PrimitiveChange<T>(
     list: List<T> = emptyList(),
-    parent: Change<T>? = null,
+    parent: Change<*>? = null,
     private val comparator: Comparator<T>,
     private val operator: Operator<T>
 ) : PrimitiveOperationsImpl<T>(list, parent, comparator, operator),

@@ -6,7 +6,7 @@ import java.util.function.Predicate
 
 sealed class EvolvedOperationsImpl<T>(
     list: List<T>,
-    parent: Change<T>?
+    parent: Change<*>?
 ) : ListChange<T>(list, parent), EvolvedOperations<T> {
     // ADDING
     override fun add(element: T) : EvolvedChange<T> =

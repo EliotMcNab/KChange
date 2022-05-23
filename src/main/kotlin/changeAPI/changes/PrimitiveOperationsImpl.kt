@@ -7,7 +7,7 @@ import java.util.function.Predicate
 
 sealed class PrimitiveOperationsImpl<T>(
     list: List<T>,
-    parent: Change<T>?,
+    parent: Change<*>?,
     private val comparator: Comparator<T>,
     private val operator: Operator<T>
 ) : ListChange<T>(list, parent), PrimitiveOperations<T> {

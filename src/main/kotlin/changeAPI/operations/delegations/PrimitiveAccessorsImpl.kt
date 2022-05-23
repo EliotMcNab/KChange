@@ -9,7 +9,7 @@ import util.mapAll
 
 internal class PrimitiveAccessorsImpl<T>(
     list: List<T>,
-    parent: Change<T>?,
+    parent: Change<*>?,
     private val comparator: Comparator<T>
 ) : ListChange<T>(list, parent), PrimitiveAccessors<T> {
     override fun findAll(vararg toFind: T) =
