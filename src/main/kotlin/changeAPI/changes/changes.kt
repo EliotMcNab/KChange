@@ -103,8 +103,8 @@ open class Change<T>(
         return compartments
     }
 
-    private fun resolve(changes: List<Change<*>>, baseList: List<*>): List<T> {
-        var result = baseList as List<T>
+    private fun resolve(changes: List<Change<*>>): List<T> {
+        var result = changes.first().list as List<T>
 
         for (change in changes) when (change) {
             is Effect<*, *> -> result = (change as Effect<T, T>).applyTo(result)
@@ -114,19 +114,7 @@ open class Change<T>(
         return result
     }
 
-    fun apply(): List<T> {
-
-        val changes = joinChanges()
-        val compartments = compartmentalise(changes)
-
-        var baseList = changes.first().list
-        for (range in compartments) {
-            // TODO: resolution must operate on the change directly to benefit from correct type casting
-            baseList = resolve(changes.subList(range.first, range.second), baseList)
-        }
-
-        return baseList as List<T>
-    }
+    fun apply(): List<T> = resolve(joinChanges())
 
     override val size: Int get() = TODO("Not yet implemented")
 
