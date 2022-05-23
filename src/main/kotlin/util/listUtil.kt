@@ -1,5 +1,6 @@
 package util
 
+import changeAPI.Generator
 import comparisons.*
 import java.util.function.Predicate
 import kotlin.Comparator
@@ -139,12 +140,26 @@ private fun <T> findFirstOrLast(
     return resultIndexes
 }
 
-fun <T> List<T>.findMatches(
+fun <T> List<T>.findAllMatches(
     filter: Predicate<T>
 ): List<Int> {
     val occurrences = arrayListOf<Int>()
     for (index in indices) if (filter.test(get(index))) occurrences.add(index)
     return occurrences
+}
+
+fun <T> List<T>.findFirstMatch(
+    filter: Predicate<T>
+): Int {
+    for (index in indices) if (filter.test(get(index))) return index
+    return -1
+}
+
+fun <T> List<T>.findLastMatch(
+    filter: Predicate<T>
+): Int {
+    for (index in indices.reversed()) if (filter.test(get(index))) return index
+    return -1
 }
 
 fun <T> List<T>.removeAt(
@@ -240,3 +255,9 @@ fun <T> MutableList<T>.setAt(
 ) {
     for (index in indexes) set(index, value)
 }
+
+fun <T> List<T>.getAt(
+    indexes: List<Int>
+): List<T> = indexes.iterator().run { Generator { get(next()) }.generate(size) }
+
+operator fun <T> List<T>.get(from: Int, to: Int): List<T> = subList(from, to)

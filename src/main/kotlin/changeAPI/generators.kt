@@ -4,7 +4,7 @@ import util.compareTo
 import java.util.Objects
 import java.util.Random
 
-interface Generator<T>{
+fun interface Generator<T>{
     fun generate(): T
     fun generate(size: Int) = buildList { for (index in 0 until size) add(generate()) }
     operator fun get(size: Int) = generate(size)
@@ -119,7 +119,7 @@ data class RandomLetterGenerator(
     private val upperCase: Boolean = false,
     val seed: Long? = null
 ) : RandomCharGenerator(max, min, seed) {
-    override fun generate() = require(validate()) { error() }.run { super.generate().apply { if (rand.nextBoolean()) uppercaseChar() } }
+    override fun generate() = require(validate()) { error() }.run { super.generate().apply { if (upperCase && rand.nextBoolean()) return uppercaseChar() } }
     private fun validate() = max > min && max in 98..122 && min in 97..121
     private fun error() = "Letters can only be generated in the range 97..122, current range: $min..$max"
 }

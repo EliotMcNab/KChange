@@ -78,7 +78,7 @@ data class RemoveIf<T>(
     override val filter: Predicate<T>,
     val parent: Change<T>
 ) : RemoveBase<T>(filter = filter, parent = parent) {
-    override fun applyTo(list: List<T>): List<T> = list.removeAt(list.findMatches(filter))
+    override fun applyTo(list: List<T>): List<T> = list.removeAt(list.findAllMatches(filter))
     override fun toString() = "RemoveIf(filter=$filter)"
 }
 
@@ -121,7 +121,7 @@ data class RetainIf<T>(
     override val filter: Predicate<T>,
     val parent: Change<T>
 ) : RetainBase<T>(filter = filter, parent = parent) {
-    override fun applyTo(list: List<T>) = list.retainAt(list.findMatches(filter))
+    override fun applyTo(list: List<T>) = list.retainAt(list.findAllMatches(filter))
     override fun toString() = "RetainIf(filter=$filter)"
 }
 

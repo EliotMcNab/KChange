@@ -1,25 +1,21 @@
-import changeAPI.Change
-import changeAPI.Generators
+import changeAPI.*
+import comparisons.IntComparator
 
 fun main() {
 
     val arraySize = 10
-    val characters = Generators.letterGenerator[arraySize]
+    val characters = RandomIntGenerator(20).generate(arraySize)
 
     val change =
         Change.of(characters)
+            .setFirst(
+                IntComparator,
+                12 to 1
+            )
             .setAt(
-                0 to 'a',
-                1 to 'b',
-                2 to 'c'
+                0 to 1,
+                2 to 3
             )
-            .setAll(
-                'a' to 'A',
-                'b' to 'B',
-                'c' to 'C'
-            )
-            .sorted()
-            .unique()
             .apply()
 
     println(characters)
