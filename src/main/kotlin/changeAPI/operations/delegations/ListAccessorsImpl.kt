@@ -19,7 +19,7 @@ internal class ListAccessorsImpl<T>(
     override fun findLast(comparator: Comparator<T>, vararg toFind: T) =
         apply().findLast(toFind.toList(), comparator)
 
-    override fun findAllMatches(filter: Predicate<T>) =
+    override fun findAllMatches(filter: (T) -> Boolean) =
         apply().findAllMatches(filter)
 
     override fun findFirstMatch(filter: Predicate<T>) =
@@ -31,7 +31,7 @@ internal class ListAccessorsImpl<T>(
     // GETTING
     override fun get(index: Int) = apply()[index]
     override fun getAt(vararg indexes: Int) = apply().getAt(indexes.toList())
-    override fun getAllMatches(filter: Predicate<T>) = apply().getAt(findAllMatches(filter))
+    override fun getAllMatches(filter: (T) -> Boolean) = apply().getAt(findAllMatches(filter))
     override fun getFirstMatch(filter: Predicate<T>) = apply()[findFirstMatch(filter)]
     override fun getLastMatch(filter: Predicate<T>) = apply()[findLastMatch(filter)]
 

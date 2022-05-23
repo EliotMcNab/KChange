@@ -9,24 +9,26 @@ import java.util.function.Predicate
 
 // TODO: update equals method in data class so they don't take parent into account ?
 
-interface Effect<T>{
-    fun applyTo(list: List<T>): List<T>
+interface Effect<I, O>{
+    fun applyTo(list: List<I>): List<O>
 }
 
-data class PrimitiveAdapter<T>(
-    val comparator: Comparator<T>,
-    val operator: Operator<T>,
+interface ContinuousEffect<T> : Effect<T, T>
+
+data class PrimitiveAdapter<I, O>(
+    val comparator: Comparator<O>,
+    val operator: Operator<O>,
     val parent: Change<*>?,
-    private val effect: Effect<T>
-) : PrimitiveChange<T>(comparator = comparator, operator = operator, parent = parent), Effect<T> {
-    override fun applyTo(list: List<T>) = effect.applyTo(list)
+    private val effect: Effect<I, O>
+) : PrimitiveChange<O>(comparator = comparator, operator = operator, parent = parent), Effect<I, O> {
+    override fun applyTo(list: List<I>) = effect.applyTo(list)
     override fun toString() = "Primitive$effect"
 }
 
 abstract class AddBase<T>(
     protected open val toAdd: List<T>,
     parent: Change<*>
-) : EvolvedChange<T>(parent), Effect<T>
+) : EvolvedChange<T>(parent), ContinuousEffect<T>
 
 data class Add<T>(
     override val toAdd: List<T>,
@@ -182,7 +184,7 @@ data class SetAt<T>(
 abstract class ComparingBase<T>(
     protected open val comparator: Comparator<T>? = null,
     parent: Change<*>
-) : EvolvedChange<T>(parent), Effect<T>
+) : EvolvedChange<T>(parent), ContinuousEffect<T>
 
 data class Unique<T>(
     override val comparator: Comparator<T>,
@@ -199,4 +201,16 @@ data class Sorted<T>(
 ) : ComparingBase<T>(comparator, parent) {
     override fun applyTo(list: List<T>) = list.sortedWith(comparator)
     override fun toString() = "Sorted(comparator=$comparator)"
+}
+
+abstract class MapBase<I, O>(
+    protected open val mappingFunction: (I) -> O,
+    parent: Change<*>
+) : EvolvedChange<O>(parent), Effect<I, O>
+
+data class SimpleMapping<I, O>(
+    override val mappingFunction: (I) -> O,
+    val parent: Change<*>
+) : MapBase<I, O>(mappingFunction, parent) {
+    override fun applyTo(list: List<I>): List<O> = list.map { value -> mappingFunction(value) }
 }

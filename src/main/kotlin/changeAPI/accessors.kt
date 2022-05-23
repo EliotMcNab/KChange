@@ -8,7 +8,7 @@ interface ListAccessors<T> {
     fun findFirst(comparator: Comparator<T>, vararg toFind: T): List<Int>
     fun findLast(comparator: Comparator<T>, vararg toFind: T): List<Int>
 
-    fun findAllMatches(filter: Predicate<T>): List<Int>
+    fun findAllMatches(filter: (T) -> Boolean): List<Int>
     fun findFirstMatch(filter: Predicate<T>): Int
     fun findLastMatch(filter: Predicate<T>): Int
 
@@ -16,7 +16,7 @@ interface ListAccessors<T> {
     fun get(index: Int): T
     fun getAt(vararg indexes: Int): List<T>
 
-    fun getAllMatches(filter: Predicate<T>): List<T>
+    fun getAllMatches(filter: (T) -> Boolean): List<T>
     fun getFirstMatch(filter: Predicate<T>): T
     fun getLastMatch(filter: Predicate<T>): T
 }

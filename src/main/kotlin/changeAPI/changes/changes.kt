@@ -107,39 +107,21 @@ open class Change<T>(
         var result = baseList as List<T>
 
         for (change in changes) when (change) {
-            is Effect<*> -> result = (change as Effect<T>).applyTo(result)
-            else         -> continue
+            is Effect<*, *> -> result = (change as Effect<T, T>).applyTo(result)
+            else            -> continue
         }
 
         return result
     }
 
     fun apply(): List<T> {
-        /*if (this::result.isInitialized) return result
-
-        val changes = ArrayList<Change<T>>(generation)
-        changes.add(this)
-        for (generation in 0 until generation) changes[generation].parent?.let { changes.add(it) }
-
-        var list = changes.last().list
-
-        for (change in changes.reversed()) {
-            when (change) {
-                is Effect<*> -> list = (change as Effect<T>).applyTo(list)
-                is Action<*> -> (change as Action<T>).inform(list)
-                else           -> continue
-            }
-        }
-
-        result = list
-
-        return result*/
 
         val changes = joinChanges()
         val compartments = compartmentalise(changes)
 
         var baseList = changes.first().list
         for (range in compartments) {
+            // TODO: resolution must operate on the change directly to benefit from correct type casting
             baseList = resolve(changes.subList(range.first, range.second), baseList)
         }
 

@@ -1,5 +1,6 @@
 import changeAPI.*
 import changeAPI.changes.Change
+import geometry.Point
 
 fun main() {
 
@@ -11,6 +12,9 @@ fun main() {
             .add('a')
             .unique()
             .sorted()
+            .mapToInt { c: Char -> c.code }
+            .mapToObj { i: Int -> Point(i.toDouble(), i.toDouble()) }
+            .mapToInt { point: Point ->  point.distance().toInt() }
             .apply()
 
     println(characters)
