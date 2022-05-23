@@ -1,5 +1,5 @@
 import changeAPI.*
-import comparisons.IntComparator
+import changeAPI.changes.Change
 
 fun main() {
 
@@ -8,16 +8,9 @@ fun main() {
 
     val change =
         Change.of(characters)
-            .setFirst(
-                IntComparator,
-                12 to 1
-            )
-            .setAt(
-                0 to 1,
-                2 to 3
-            )
-            .apply()
+            .unique()
+            .sorted()
 
     println(characters)
-    println(change)
+    println(change.apply())
 }

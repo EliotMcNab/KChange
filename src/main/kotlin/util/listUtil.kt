@@ -1,6 +1,7 @@
 package util
 
 import changeAPI.Generator
+import changeAPI.information.Operator
 import comparisons.*
 import java.util.function.Predicate
 import kotlin.Comparator
@@ -261,3 +262,39 @@ fun <T> List<T>.getAt(
 ): List<T> = indexes.iterator().run { Generator { get(next()) }.generate(size) }
 
 operator fun <T> List<T>.get(from: Int, to: Int): List<T> = subList(from, to)
+
+fun <T> List<T>.sumOf(
+    operator: Operator<T>,
+): T {
+    var sum = get(0)
+
+    for (index in 1 until size) sum = operator.add(sum, get(index))
+    return sum
+}
+
+fun <T> List<T>.differenceOf(
+    operator: Operator<T>,
+): T {
+    var diff = get(0)
+
+    for (index in 1 until size) diff = operator.sub(diff, get(index))
+    return diff
+}
+
+fun <T> List<T>.productOf(
+    operator: Operator<T>,
+): T {
+    var prod = get(0)
+
+    for (index in 1 until size) prod = operator.mult(prod, get(index))
+    return prod
+}
+
+fun <T> List<T>.quotientOf(
+    operator: Operator<T>,
+): T {
+    var quotient = get(0)
+
+    for (index in 1 until size) quotient = operator.div(quotient, get(index))
+    return quotient
+}

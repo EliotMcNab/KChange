@@ -1,5 +1,9 @@
 package changeAPI
 
+import changeAPI.changes.Change
+import changeAPI.changes.EvolvedChange
+import changeAPI.changes.PrimitiveChange
+import changeAPI.information.Operator
 import util.*
 import java.util.function.Predicate
 
@@ -11,9 +15,10 @@ interface Effect<T>{
 
 data class PrimitiveAdapter<T>(
     val comparator: Comparator<T>,
+    val operator: Operator<T>,
     val parent: Change<T>?,
     private val effect: Effect<T>
-) : PrimitiveChange<T>(comparator = comparator, parent = parent), Effect<T> {
+) : PrimitiveChange<T>(comparator = comparator, operator = operator, parent = parent), Effect<T> {
     override fun applyTo(list: List<T>) = effect.applyTo(list)
     override fun toString() = "Primitive$effect"
 }
@@ -193,5 +198,5 @@ data class Sorted<T>(
     val parent: Change<T>
 ) : ComparingBase<T>(comparator, parent) {
     override fun applyTo(list: List<T>) = list.sortedWith(comparator)
-    override fun toString() = "Unique(comparator=$comparator)"
+    override fun toString() = "Sorted(comparator=$comparator)"
 }

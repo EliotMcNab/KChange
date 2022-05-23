@@ -1,10 +1,10 @@
-package changeAPI.delegations
+package changeAPI.changes
 
 import changeAPI.*
 import changeAPI.operations.EvolvedOperations
 import java.util.function.Predicate
 
-internal class EvolvedOperationsImpl<T>(
+sealed class EvolvedOperationsImpl<T>(
     list: List<T>,
     parent: Change<T>?
 ) : ListChange<T>(list, parent), EvolvedOperations<T> {

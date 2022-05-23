@@ -1,15 +1,18 @@
-package changeAPI
+package changeAPI.changes
 
-import changeAPI.delegations.EvolvedOperationsImpl
-import changeAPI.delegations.PrimitiveAccessorsImpl
-import changeAPI.delegations.PrimitiveOperationsImpl
+import changeAPI.*
+import changeAPI.ListInformationImpl
+import changeAPI.PrimitiveInformationImpl
+import changeAPI.actions.Action
+import changeAPI.information.*
 import changeAPI.operations.EvolvedOperations
-import changeAPI.operations.PrimitiveOperations
+import changeAPI.operations.delegations.ListAccessorsImpl
+import changeAPI.operations.delegations.PrimitiveAccessorsImpl
 import comparisons.*
 
-sealed class Change<T>(
-    private val list: List<T> = emptyList(),
-    private val parent: Change<T>? = null,
+open class Change<T>(
+    private val list: List<T>,
+    private val parent: Change<T>?,
 ) : Collection<Change<T>> {
     private val generation: Int = (parent?.generation?.plus(1)) ?: 0
     private lateinit var result: List<T>
@@ -42,7 +45,7 @@ sealed class Change<T>(
         require(count >= 0)
             { throw NonexistentChangeException("Rollback amount must be a positive integer") }
         require(generation - count >= 0)
-            { throw NonexistentChangeException("Can only rollback $generation generations. Desired rollback: $count generations")}
+            { throw NonexistentChangeException("Can only rollback $generation generations. Desired rollback: $count generations") }
 
         var currentChange = this
         for (generation in 0 until count) currentChange = currentChange.parent!!
@@ -73,8 +76,8 @@ sealed class Change<T>(
 
         for (change in changes.reversed()) {
             when (change) {
-                is Effect<*>   -> list = (change as Effect<T>).applyTo(list)
-                is Informer<*> -> (change as Informer<T>).inform(list)
+                is Effect<*> -> list = (change as Effect<T>).applyTo(list)
+                is Action<*> -> (change as Action<T>).inform(list)
                 else           -> continue
             }
         }
@@ -96,53 +99,48 @@ abstract class ListChange<T> (
     list: List<T>,
     parent: Change<T>?
 ) : Change<T>(list, parent),
-    ListAccessors<T> by ListAccessorsImpl(list, parent) {
-}
+    ListAccessors<T> by ListAccessorsImpl(list, parent),
+    ListInformation<T> by ListInformationImpl(list, parent)
 
 open class EvolvedChange<T> private constructor(
     list: List<T> = emptyList(),
     parent: Change<T>? = null
-) : ListChange<T>(list, parent),
-    EvolvedOperations<T> by EvolvedOperationsImpl(list, parent) {
-
+) : EvolvedOperationsImpl<T>(list, parent) {
     constructor(list: List<T> = emptyList()) : this(list, null)
     protected constructor(parent: Change<T>) : this(emptyList(), parent)
 }
-
-sealed class PrimitiveChange<T>(
+open class PrimitiveChange<T>(
     list: List<T> = emptyList(),
     parent: Change<T>? = null,
-    private val comparator: Comparator<T>
-) : ListChange<T>(list, parent),
-    PrimitiveOperations<T> by PrimitiveOperationsImpl(list, parent, comparator),
-    PrimitiveAccessors<T> by PrimitiveAccessorsImpl(list, parent, comparator) {
-}
-
-
+    private val comparator: Comparator<T>,
+    private val operator: Operator<T>
+) : PrimitiveOperationsImpl<T>(list, parent, comparator, operator),
+    PrimitiveAccessors<T> by PrimitiveAccessorsImpl(list, parent, comparator),
+    PrimitiveInformation<T> by PrimitiveInformationImpl(list, parent, operator)
 data class ByteChange(
     private val list: List<Byte>
-) : PrimitiveChange<Byte>(list = list, comparator = ByteComparator)
+) : PrimitiveChange<Byte>(list = list, comparator = ByteComparator, operator = ByteOperator)
 
 data class ShortChange(
     private val list: List<Short>
-) : PrimitiveChange<Short>(list = list, comparator = ShortComparator)
+) : PrimitiveChange<Short>(list = list, comparator = ShortComparator, operator = ShortOperator)
 
 data class IntChange(
     private val list: List<Int>
-) : PrimitiveChange<Int>(list = list, comparator = IntComparator)
+) : PrimitiveChange<Int>(list = list, comparator = IntComparator, operator = IntOperator)
 
 data class LongChange(
     private val list: List<Long>
-) : PrimitiveChange<Long>(list = list, comparator = LongComparator)
+) : PrimitiveChange<Long>(list = list, comparator = LongComparator, operator = LongOperator)
 
 data class FloatChange(
     private val list: List<Float>
-) : PrimitiveChange<Float>(list = list, comparator = FloatComparator)
+) : PrimitiveChange<Float>(list = list, comparator = FloatComparator, operator = FloatOperator)
 
 data class DoubleChange(
     private val list: List<Double>
-) : PrimitiveChange<Double>(list = list, comparator = DoubleComparator)
+) : PrimitiveChange<Double>(list = list, comparator = DoubleComparator, operator = DoubleOperator)
 
 data class CharChange(
     private val list: List<Char>
-) : PrimitiveChange<Char>(list = list, comparator = CharComparator)
+) : PrimitiveChange<Char>(list = list, comparator = CharComparator, operator = CharOperator)

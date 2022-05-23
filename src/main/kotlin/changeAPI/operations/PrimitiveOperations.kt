@@ -1,6 +1,6 @@
 package changeAPI.operations
 
-import changeAPI.PrimitiveChange
+import changeAPI.changes.PrimitiveChange
 
 interface PrimitiveOperations<T>: PrimitiveRedefinitions<T> {
     // remove

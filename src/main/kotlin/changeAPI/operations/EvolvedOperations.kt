@@ -1,6 +1,6 @@
 package changeAPI.operations
 
-import changeAPI.EvolvedChange
+import changeAPI.changes.EvolvedChange
 import java.util.function.Predicate
 
 interface EvolvedOperations<T> : ListOperations<T> {

@@ -1,6 +1,6 @@
 package changeAPI.operations
 
-import changeAPI.PrimitiveChange
+import changeAPI.changes.PrimitiveChange
 import java.util.function.Predicate
 
 sealed interface PrimitiveRedefinitions<T> : ListOperations<T> {

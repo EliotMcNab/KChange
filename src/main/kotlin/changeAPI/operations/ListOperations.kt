@@ -1,6 +1,6 @@
 package changeAPI.operations
 
-import changeAPI.ListChange
+import changeAPI.changes.ListChange
 import java.util.function.Predicate
 
 interface ListOperations<T>{

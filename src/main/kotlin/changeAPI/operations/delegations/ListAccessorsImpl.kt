@@ -1,6 +1,6 @@
-package changeAPI
+package changeAPI.operations.delegations
 
-import changeAPI.Change
+import changeAPI.changes.Change
 import changeAPI.ListAccessors
 import util.*
 import java.util.function.Predicate
