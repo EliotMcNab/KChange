@@ -5,7 +5,6 @@ import changeAPI.ListInformationImpl
 import changeAPI.PrimitiveInformationImpl
 import changeAPI.actions.Action
 import changeAPI.information.*
-import changeAPI.operations.EvolvedOperations
 import changeAPI.operations.delegations.ListAccessorsImpl
 import changeAPI.operations.delegations.PrimitiveAccessorsImpl
 import comparisons.*
@@ -33,6 +32,8 @@ open class Change<T>(
         fun of(builder: List<Float>)   = FloatChange(builder)
         fun of(builder: List<Double>)  = DoubleChange(builder)
         fun of(builder: List<Char>)    = CharChange(builder)
+
+        fun of(packed: String)         = CharChange(packed.toCharArray().toList())
 
         fun <T> of(list: List<T>)      = EvolvedChange(list)
         fun <T> of(vararg elements: T) = EvolvedChange(elements.toList())

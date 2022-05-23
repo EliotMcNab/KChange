@@ -7,10 +7,11 @@ fun main() {
     val characters = RandomIntGenerator(20).generate(arraySize)
 
     val change =
-        Change.of(characters)
+        Change.of("hello")
             .unique()
             .sorted()
+            .apply()
 
     println(characters)
-    println(change.apply())
+    println(change)
 }
