@@ -1,6 +1,6 @@
 package changeAPI.information
 
-interface ListInformation<T>{
+interface EvolvedInformation<T>{
     fun sumOf(operator: Operator<T>): T
     fun differenceOf(operator: Operator<T>): T
     fun productOf(operator: Operator<T>): T

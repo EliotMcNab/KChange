@@ -7,7 +7,7 @@ import comparisons.*
 sealed class TransformImpl<T>(
     list: List<T>,
     parent: Change<*>?,
-) : ListChange<T>(list, parent), ListTransforms<T> {
+) : Change<T>(list, parent), ListTransforms<T> {
     override fun mapToByte(mappingFunction: (T) -> Byte): PrimitiveChange<Byte> =
         PrimitiveAdapter(ByteComparator, ByteOperator, this, SimpleMapping(mappingFunction, this))
 

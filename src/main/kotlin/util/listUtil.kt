@@ -267,7 +267,7 @@ fun <T> List<T>.sumOf(
     operator: Operator<T>
 ): T {
     var sum = get(0)
-
+    
     for (index in 1 until size) sum = operator.add(sum, get(index))
     return sum
 }

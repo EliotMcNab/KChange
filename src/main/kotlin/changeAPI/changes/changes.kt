@@ -1,18 +1,14 @@
 package changeAPI.changes
 
 import changeAPI.*
-import changeAPI.information.ListInformationImpl
-import changeAPI.information.PrimitiveInformationImpl
 import changeAPI.information.*
-import changeAPI.operations.delegations.ListAccessorsImpl
-import changeAPI.operations.delegations.PrimitiveAccessorsImpl
 import comparisons.*
 
 open class Change<T>(
     private val list: List<T>,
     private val parent: Change<*>?,
     typeChange: Boolean = false
-) : Collection<Change<T>> {
+) {
     private val generation: Int = (parent?.generation?.plus(1)) ?: 0
     private val typeGeneration: Int = if (!typeChange) (parent?.generation?.plus(1)) ?: 0  else 0
 
@@ -75,7 +71,7 @@ open class Change<T>(
         return currentChange
     }
 
-    private fun joinChanges(): List<Change<*>> {
+    fun retrieveChanges(): List<Change<*>> {
         val allChange = arrayListOf<Change<*>>()
 
         allChange.add(this)
@@ -97,22 +93,8 @@ open class Change<T>(
         return resolved
     }
 
-    fun apply(): List<T> = if (this::result.isInitialized) result else resolve(joinChanges())
-
-    override val size: Int get() = TODO("Not yet implemented")
-
-    override fun isEmpty(): Boolean = TODO("Not yet implemented")
-    override fun iterator(): Iterator<Change<T>> = TODO("Not yet implemented")
-    override fun containsAll(elements: Collection<Change<T>>): Boolean = TODO("Not yet implemented")
-    override fun contains(element: Change<T>): Boolean = TODO("Not yet implemented")
+    fun apply(): List<T> = if (this::result.isInitialized) result else resolve(retrieveChanges())
 }
-
-abstract class ListChange<T> (
-    list: List<T>,
-    parent: Change<*>?
-) : Change<T>(list, parent),
-    ListAccessors<T> by ListAccessorsImpl(list, parent),
-    ListInformation<T> by ListInformationImpl(list, parent)
 
 open class EvolvedChange<T> private constructor(
     list: List<T> = emptyList(),
@@ -124,11 +106,9 @@ open class EvolvedChange<T> private constructor(
 open class PrimitiveChange<T>(
     list: List<T> = emptyList(),
     parent: Change<*>? = null,
-    private val comparator: Comparator<T>,
-    private val operator: Operator<T>
-) : PrimitiveOperationsImpl<T>(list, parent, comparator, operator),
-    PrimitiveAccessors<T> by PrimitiveAccessorsImpl(list, parent, comparator),
-    PrimitiveInformation<T> by PrimitiveInformationImpl(list, parent, operator)
+    comparator: Comparator<T>,
+    operator: Operator<T>
+) : PrimitiveOperationsImpl<T>(list, parent, comparator, operator)
 data class ByteChange(
     private val list: List<Byte>
 ) : PrimitiveChange<Byte>(list = list, comparator = ByteComparator, operator = ByteOperator)

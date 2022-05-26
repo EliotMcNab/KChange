@@ -1,6 +1,5 @@
 package changeAPI.operations
 
-import changeAPI.changes.ListChange
 import changeAPI.changes.PrimitiveChange
 import java.util.function.Predicate
 

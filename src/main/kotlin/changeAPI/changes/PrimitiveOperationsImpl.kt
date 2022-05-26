@@ -10,7 +10,7 @@ sealed class PrimitiveOperationsImpl<T>(
     parent: Change<*>?,
     private val comparator: Comparator<T>,
     private val operator: Operator<T>
-) : TransformImpl<T>(list, parent), PrimitiveOperations<T> {
+) : PrimitiveAccessorsImpl<T>(list, parent, comparator, operator), PrimitiveOperations<T> {
     // ADDING
     override fun add(element: T): PrimitiveChange<T> =
         PrimitiveAdapter(this.comparator, this.operator, this, Add(listOf(element), this))

@@ -1,14 +1,15 @@
-package changeAPI.operations.delegations
+package changeAPI.changes
 
-import changeAPI.changes.Change
-import changeAPI.ListAccessors
+import changeAPI.EvolvedAccessors
 import util.*
 import java.util.function.Predicate
 
-internal open class ListAccessorsImpl<T>(
+sealed class EvolvedAccessorsImpl<T>(
     list: List<T>,
-    parent: Change<*>?
-) : Change<T>(list, parent), ListAccessors<T> {
+    parent: Change<*>?,
+) : EvolvedInformationImpl<T>(list, parent),
+    EvolvedAccessors<T> {
+
     // FINDING
     override fun findAll(comparator: Comparator<T>, vararg toFind: T) =
         apply().mapAll(toFind.toList(), comparator)

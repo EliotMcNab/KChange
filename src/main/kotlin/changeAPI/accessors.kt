@@ -2,7 +2,7 @@ package changeAPI
 
 import java.util.function.Predicate
 
-interface ListAccessors<T> {
+interface EvolvedAccessors<T> {
     // finding
     fun findAll(comparator: Comparator<T>, vararg toFind: T): Map<T, List<Int>>
     fun findFirst(comparator: Comparator<T>, vararg toFind: T): List<Int>
