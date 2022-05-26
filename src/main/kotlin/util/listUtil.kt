@@ -2,6 +2,7 @@ package util
 
 import changeAPI.Generator
 import changeAPI.information.Operator
+import changeAPI.information.Operator.OPERATIONS.*
 import comparisons.*
 import java.util.function.Predicate
 import kotlin.Comparator
@@ -266,6 +267,8 @@ operator fun <T> List<T>.get(from: Int, to: Int): List<T> = subList(from, to)
 fun <T> List<T>.sumOf(
     operator: Operator<T>
 ): T {
+    require(operator.supports(ADDITION))
+
     var sum = get(0)
     
     for (index in 1 until size) sum = operator.add(sum, get(index))
@@ -275,6 +278,8 @@ fun <T> List<T>.sumOf(
 fun <T> List<T>.differenceOf(
     operator: Operator<T>
 ): T {
+    require(operator.supports(SUBTRACTION))
+
     var diff = get(0)
 
     for (index in 1 until size) diff = operator.sub(diff, get(index))
@@ -284,6 +289,8 @@ fun <T> List<T>.differenceOf(
 fun <T> List<T>.productOf(
     operator: Operator<T>
 ): T {
+    require(operator.supports(MULTIPLICATION))
+
     var prod = get(0)
 
     for (index in 1 until size) prod = operator.mult(prod, get(index))
@@ -293,10 +300,22 @@ fun <T> List<T>.productOf(
 fun <T> List<T>.quotientOf(
     operator: Operator<T>
 ): T {
+    require(operator.supports(DIVISION))
+
     var quotient = get(0)
 
     for (index in 1 until size) quotient = operator.div(quotient, get(index))
     return quotient
+}
+
+fun <T> List<T>.mergeOf(
+    operator: Operator<T>,
+): T {
+    require(operator.supports(MERGING))
+
+    var merge = get(0)
+    for (index in 1 until size) merge = operator.merge(merge, get(index))
+    return merge
 }
 
 fun <T> List<T>.group(

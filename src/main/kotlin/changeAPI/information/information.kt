@@ -1,10 +1,11 @@
 package changeAPI.information
 
 interface EvolvedInformation<T>{
-    fun sumOf(operator: Operator<T>): T
-    fun differenceOf(operator: Operator<T>): T
-    fun productOf(operator: Operator<T>): T
-    fun quotientOf(operator: Operator<T>): T
+    fun sumAll(operator: Operator<T>): T
+    fun subAll(operator: Operator<T>): T
+    fun multAll(operator: Operator<T>): T
+    fun divAll(operator: Operator<T>): T
+    fun mergeAll(operator: Operator<T>): T
 }
 
 interface PrimitiveInformation<T> {

@@ -2,10 +2,7 @@ package changeAPI.changes
 
 import changeAPI.information.EvolvedInformation
 import changeAPI.information.Operator
-import util.differenceOf
-import util.productOf
-import util.quotientOf
-import util.sumOf
+import util.*
 
 sealed class EvolvedInformationImpl<T>(
     list: List<T>,
@@ -13,13 +10,14 @@ sealed class EvolvedInformationImpl<T>(
 ) : TransformImpl<T>(list, parent),
     EvolvedInformation<T> {
 
-    override fun sumOf(operator: Operator<T>): T = apply().sumOf(operator)
+    override fun sumAll(operator: Operator<T>): T = apply().sumOf(operator)
 
-    override fun differenceOf(operator: Operator<T>): T = apply().differenceOf(operator)
+    override fun subAll(operator: Operator<T>): T = apply().differenceOf(operator)
 
-    override fun productOf(operator: Operator<T>): T = apply().productOf(operator)
+    override fun multAll(operator: Operator<T>): T = apply().productOf(operator)
 
-    override fun quotientOf(operator: Operator<T>): T = apply().quotientOf(operator)
+    override fun divAll(operator: Operator<T>): T = apply().quotientOf(operator)
 
+    override fun mergeAll(operator: Operator<T>): T = apply().mergeOf(operator)
 
 }
