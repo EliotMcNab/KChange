@@ -1,15 +1,13 @@
 package changeAPI.changes
 
-import changeAPI.PrimitiveAdapter
-import changeAPI.SimpleMapping
+import changeAPI.*
 import changeAPI.information.*
-import changeAPI.operations.ListMappings
+import changeAPI.operations.ListTransforms
 import comparisons.*
-
-sealed class MappingImpl<T>(
+sealed class TransformImpl<T>(
     list: List<T>,
     parent: Change<*>?,
-) : ListChange<T>(list, parent), ListMappings<T> {
+) : ListChange<T>(list, parent), ListTransforms<T> {
     override fun mapToByte(mappingFunction: (T) -> Byte): PrimitiveChange<Byte> =
         PrimitiveAdapter(ByteComparator, ByteOperator, this, SimpleMapping(mappingFunction, this))
 
@@ -36,4 +34,12 @@ sealed class MappingImpl<T>(
 
     override fun <O> mapToObj(mappingFunction: (T) -> O): EvolvedChange<O> =
         SimpleMapping(mappingFunction, this)
+
+    // GROUPING
+    override fun group(groupSize: Int): EvolvedChange<List<T>> =
+        Group(groupSize, this)
+
+    override fun groupBy(vararg filters: (T) -> Boolean): EvolvedChange<List<T>> =
+        GroupBy(filters.toList(), this)
 }
+

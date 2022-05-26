@@ -1,22 +1,20 @@
 import changeAPI.*
 import changeAPI.changes.Change
+import comparisons.DoubleComparator
 import geometry.Point
 
 fun main() {
 
-    val arraySize = 10
-    val characters = RandomIntGenerator(20).generate(arraySize)
+    val arraySize = 9
+    val values = RandomDoubleGenerator(max = 20.0, precision = 2).generate(arraySize)
 
     val change =
-        Change.of("hello")
-            .add('a')
-            .unique()
-            .sorted()
-            .mapToInt { c: Char -> c.code }
-            .mapToObj { i: Int -> Point(i.toDouble(), i.toDouble()) }
-            .mapToInt { point: Point ->  point.distance().toInt() }
+        Change.of(values)
+            .groupBy({ num -> num in 0.0..10.0 }, { num -> num in 10.0..20.0 })
+            .forEach { list: List<Double> -> list.sortedWith(DoubleComparator) }
             .apply()
+            .sortedWith(compareBy { it[0] })
 
-    println(characters)
+    println(values)
     println(change)
 }

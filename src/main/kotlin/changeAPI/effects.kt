@@ -214,3 +214,35 @@ data class SimpleMapping<I, O>(
 ) : MapBase<I, O>(mappingFunction, parent) {
     override fun applyTo(list: List<I>): List<O> = list.map { value -> mappingFunction(value) }
 }
+
+abstract class GroupBase<T>(
+    protected open val groupSize: Int = 0,
+    protected open val filters:  List<(T) -> Boolean>? = null,
+    parent: Change<*>
+) : EvolvedChange<List<T>>(parent), Effect<T, List<T>>
+
+data class Group<T>(
+    override val groupSize: Int = 2,
+    val parent: Change<*>,
+) : GroupBase<T>(groupSize = groupSize, parent = parent) {
+    override fun applyTo(list: List<T>): List<List<T>> = list.group(groupSize)
+}
+
+data class GroupBy<T>(
+    override val filters: List<(T) -> Boolean>,
+    val parent: Change<*>,
+) : GroupBase<T>(filters = filters, parent = parent) {
+    override fun applyTo(list: List<T>): List<List<T>> = list.groupBy(filters)
+}
+
+abstract class FunctionalBase<T>(
+    protected open val function: (T) -> T,
+    parent: Change<*>
+) : EvolvedChange<T>(parent), ContinuousEffect<T>
+
+data class ForEach<T>(
+    override val function: (T) -> T,
+    val parent: Change<*>
+) : FunctionalBase<T>(function, parent) {
+    override fun applyTo(list: List<T>): List<T> = list.map { value -> function(value) }
+}

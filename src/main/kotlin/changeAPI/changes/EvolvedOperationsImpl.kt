@@ -1,17 +1,13 @@
 package changeAPI.changes
 
 import changeAPI.*
-import changeAPI.information.CharOperator
-import changeAPI.information.IntOperator
 import changeAPI.operations.EvolvedOperations
-import comparisons.CharComparator
-import comparisons.IntComparator
 import java.util.function.Predicate
 
 sealed class EvolvedOperationsImpl<T>(
     list: List<T>,
     parent: Change<*>?
-) : MappingImpl<T>(list, parent), EvolvedOperations<T> {
+) : TransformImpl<T>(list, parent), EvolvedOperations<T> {
     // ADDING
     override fun add(element: T) : EvolvedChange<T> =
         Add(listOf(element), this)
@@ -113,4 +109,8 @@ sealed class EvolvedOperationsImpl<T>(
 
     override fun unique(comparator: Comparator<T>): EvolvedChange<T> =
         Unique(comparator, this)
+
+    // FUNCTIONS
+    override fun forEach(function: (T) -> T): EvolvedChange<T> =
+        ForEach(function, this)
 }

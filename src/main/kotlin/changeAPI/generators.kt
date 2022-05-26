@@ -1,6 +1,7 @@
 package changeAPI
 
 import util.compareTo
+import util.toPrecision
 import java.util.Objects
 import java.util.Random
 
@@ -74,21 +75,23 @@ data class RandomLongGenerator(
 data class RandomFloatGenerator(
     private val max: Float,
     private val min: Float = 0.0F,
+    val precision: Int = 10,
     private val seed: Long? = null
-) : RandomNumberGenerator<Float>(seed, min, max, "float", this::generateNumber) {
-    private companion object : CompanionNumberGenerator<Float> {
-        override fun generateNumber(min: Float, max: Float, rand: Random) = rand.nextFloat(min, max)
-    }
+) : RandomGenerator<Float>(seed) {
+    override fun generate() = require(min < max) {errorMessage()}.run { generateImpl() }
+    private fun errorMessage() = "Cannot generate Double between min value $min and max value $max"
+    private fun generateImpl() = rand.nextFloat(min, max).toPrecision(precision)
 }
 
 data class RandomDoubleGenerator(
     private val max: Double,
     private val min: Double = 0.0,
+    private val precision: Int = 10,
     private val seed: Long? = null
-) : RandomNumberGenerator<Double>(seed, min, max, "double", this::generateNumber) {
-    private companion object : CompanionNumberGenerator<Double> {
-        override fun generateNumber(min: Double, max: Double, rand: Random) = rand.nextDouble(min, max)
-    }
+) : RandomGenerator<Double>(seed) {
+    override fun generate() = require(min < max) {errorMessage()}.run { generateImpl() }
+    private fun errorMessage() = "Cannot generate Double between min value $min and max value $max"
+    private fun generateImpl() = rand.nextDouble(min, max).toPrecision(precision)
 }
 
 open class RandomCharGenerator(

@@ -264,7 +264,7 @@ fun <T> List<T>.getAt(
 operator fun <T> List<T>.get(from: Int, to: Int): List<T> = subList(from, to)
 
 fun <T> List<T>.sumOf(
-    operator: Operator<T>,
+    operator: Operator<T>
 ): T {
     var sum = get(0)
 
@@ -273,7 +273,7 @@ fun <T> List<T>.sumOf(
 }
 
 fun <T> List<T>.differenceOf(
-    operator: Operator<T>,
+    operator: Operator<T>
 ): T {
     var diff = get(0)
 
@@ -282,7 +282,7 @@ fun <T> List<T>.differenceOf(
 }
 
 fun <T> List<T>.productOf(
-    operator: Operator<T>,
+    operator: Operator<T>
 ): T {
     var prod = get(0)
 
@@ -291,10 +291,45 @@ fun <T> List<T>.productOf(
 }
 
 fun <T> List<T>.quotientOf(
-    operator: Operator<T>,
+    operator: Operator<T>
 ): T {
     var quotient = get(0)
 
     for (index in 1 until size) quotient = operator.div(quotient, get(index))
     return quotient
+}
+
+fun <T> List<T>.group(
+    groupSize: Int,
+): List<List<T>> {
+    val result = ArrayList<ArrayList<T>>(size / groupSize)
+
+    for (index in indices) {
+        if (index % groupSize == 0) result.add(arrayListOf(get(index)))
+        else                        result.last().add(get(index))
+    }
+
+    return result
+}
+
+@JvmName("groupByRanges")
+fun <T : Comparable<T>> List<T>.groupBy(
+    ranges: List<ClosedRange<T>>,
+): List<List<T>> {
+    val result = ArrayList<ArrayList<T>>(ranges.size)
+
+    for (value in this) for (index in ranges.indices) if (value in ranges[index]) result[index].add(value)
+
+    return result
+}
+
+@JvmName("groupByFilters")
+fun <T> List<T>.groupBy(
+    filters: List<(T) -> Boolean>,
+): List<List<T>> {
+    val result = buildList<ArrayList<T>> { for (index in filters.indices) add(arrayListOf()) }
+
+    for (value in this) for (index in filters.indices) if (filters[index](value)) result[index].add(value)
+
+    return result
 }

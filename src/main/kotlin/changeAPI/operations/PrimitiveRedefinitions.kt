@@ -43,5 +43,7 @@ sealed interface PrimitiveRedefinitions<T> : ListOperations<T> {
     // ordering
     override fun sorted(comparator: Comparator<T>): PrimitiveChange<T>
     override fun unique(comparator: Comparator<T>): PrimitiveChange<T>
+    // functions
+    override fun forEach(function: (T) -> T): PrimitiveChange<T>
 
 }

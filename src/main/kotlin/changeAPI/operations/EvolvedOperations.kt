@@ -43,5 +43,7 @@ interface EvolvedOperations<T> : ListOperations<T> {
     // ordering
     override fun sorted(comparator: Comparator<T>): EvolvedChange<T>
     override fun unique(comparator: Comparator<T>): EvolvedChange<T>
+    // functions
+    override fun forEach(function: (T) -> T): EvolvedChange<T>
 
 }

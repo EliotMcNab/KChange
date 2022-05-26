@@ -43,4 +43,6 @@ interface ListOperations<T>{
     // ordering
     fun sorted(comparator: Comparator<T>): ListChange<T>
     fun unique(comparator: Comparator<T>): ListChange<T>
+    // functions
+    fun forEach(function: (T) -> T): ListChange<T>
 }

@@ -1,12 +1,8 @@
 package changeAPI.changes
 
 import changeAPI.*
-import changeAPI.information.CharOperator
-import changeAPI.information.IntOperator
 import changeAPI.information.Operator
 import changeAPI.operations.PrimitiveOperations
-import comparisons.CharComparator
-import comparisons.IntComparator
 import java.util.function.Predicate
 
 sealed class PrimitiveOperationsImpl<T>(
@@ -14,7 +10,7 @@ sealed class PrimitiveOperationsImpl<T>(
     parent: Change<*>?,
     private val comparator: Comparator<T>,
     private val operator: Operator<T>
-) : MappingImpl<T>(list, parent), PrimitiveOperations<T> {
+) : TransformImpl<T>(list, parent), PrimitiveOperations<T> {
     // ADDING
     override fun add(element: T): PrimitiveChange<T> =
         PrimitiveAdapter(this.comparator, this.operator, this, Add(listOf(element), this))
@@ -178,4 +174,8 @@ sealed class PrimitiveOperationsImpl<T>(
 
     override fun unique(): PrimitiveChange<T> =
         unique(comparator)
+
+    // FUNCTIONS
+    override fun forEach(function: (T) -> T): PrimitiveChange<T> =
+        PrimitiveAdapter(this.comparator, this.operator, this, ForEach(function, this))
 }
