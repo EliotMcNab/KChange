@@ -71,7 +71,7 @@ open class Change<T>(
         return currentChange
     }
 
-    fun retrieveChanges(): List<Change<*>> {
+    private fun retrieveChanges(): List<Change<*>> {
         val allChange = arrayListOf<Change<*>>()
 
         allChange.add(this)

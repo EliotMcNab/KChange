@@ -11,7 +11,7 @@ sealed class PrimitiveAccessorsImpl<T>(
     parent: Change<*>?,
     private val comparator: Comparator<T>,
     operator: Operator<T>,
-) : PrimitiveInformationImpl<T>(list, parent, operator),
+) : PrimitiveCollectingImpl<T>(list, parent, operator),
     PrimitiveAccessors<T>,
     EvolvedAccessors<T> {
 

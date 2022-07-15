@@ -264,7 +264,7 @@ fun <T> List<T>.getAt(
 
 operator fun <T> List<T>.get(from: Int, to: Int): List<T> = subList(from, to)
 
-fun <T> List<T>.sumOf(
+fun <T> List<T>.addAll(
     operator: Operator<T>
 ): T {
     require(operator.supports(ADDITION))
@@ -275,7 +275,7 @@ fun <T> List<T>.sumOf(
     return sum
 }
 
-fun <T> List<T>.differenceOf(
+fun <T> List<T>.subAll(
     operator: Operator<T>
 ): T {
     require(operator.supports(SUBTRACTION))
@@ -286,7 +286,7 @@ fun <T> List<T>.differenceOf(
     return diff
 }
 
-fun <T> List<T>.productOf(
+fun <T> List<T>.multAll(
     operator: Operator<T>
 ): T {
     require(operator.supports(MULTIPLICATION))
@@ -297,7 +297,7 @@ fun <T> List<T>.productOf(
     return prod
 }
 
-fun <T> List<T>.quotientOf(
+fun <T> List<T>.divAll(
     operator: Operator<T>
 ): T {
     require(operator.supports(DIVISION))
@@ -308,7 +308,7 @@ fun <T> List<T>.quotientOf(
     return quotient
 }
 
-fun <T> List<T>.mergeOf(
+fun <T> List<T>.mergeAll(
     operator: Operator<T>,
 ): T {
     require(operator.supports(MERGING))

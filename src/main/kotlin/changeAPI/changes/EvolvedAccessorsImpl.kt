@@ -7,7 +7,7 @@ import java.util.function.Predicate
 sealed class EvolvedAccessorsImpl<T>(
     list: List<T>,
     parent: Change<*>?,
-) : EvolvedInformationImpl<T>(list, parent),
+) : EvolvedCollectingImpl<T>(list, parent),
     EvolvedAccessors<T> {
 
     // FINDING

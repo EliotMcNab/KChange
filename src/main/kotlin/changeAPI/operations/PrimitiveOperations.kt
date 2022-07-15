@@ -1,7 +1,11 @@
 package changeAPI.operations
 
 import changeAPI.changes.PrimitiveChange
+import changeAPI.changes.Change
 
+/**
+ * Defines functions used for operating on a *primitive type* [Change]
+ */
 interface PrimitiveOperations<T>: PrimitiveRedefinitions<T> {
     // remove
     fun removeAll(vararg elements: T): PrimitiveChange<T>

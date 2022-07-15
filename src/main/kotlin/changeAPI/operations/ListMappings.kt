@@ -3,7 +3,11 @@ package changeAPI.operations
 import changeAPI.changes.EvolvedChange
 import changeAPI.changes.PrimitiveChange
 
-interface ListTransforms<I> {
+/**
+ * Defines mappings from one Change type to another
+ * @author Eliot McNab
+ */
+interface ListMappings<I> {
     // mapping
     fun mapToByte(mappingFunction: (I) -> Byte): PrimitiveChange<Byte>
     fun mapToShort(mappingFunction: (I) -> Short): PrimitiveChange<Short>

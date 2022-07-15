@@ -1,24 +1,25 @@
 package util
 
 import changeAPI.information.Operator
+import changeAPI.information.Operator.OPERATIONS.*
 
-fun <T> addBy(summator: (a: T, b: T) -> T): Operator<T> = object : Operator<T>(setOf(OPERATIONS.ADDITION)) {
+fun <T> addBy(summator: (a: T, b: T) -> T): Operator<T> = object : Operator<T>(setOf(ADDITION)) {
     override fun add(a: T, b: T): T = summator(a, b)
 }
 
-fun <T> subBy(subtractor: (a: T, b: T) -> T): Operator<T> = object : Operator<T>(setOf(OPERATIONS.SUBTRACTION)) {
+fun <T> subBy(subtractor: (a: T, b: T) -> T): Operator<T> = object : Operator<T>(setOf(SUBTRACTION)) {
     override fun sub(a: T, b: T): T = subtractor(a, b)
 }
 
-fun <T> multBy(multiplier: (a: T, b: T) -> T): Operator<T> = object : Operator<T>(setOf(OPERATIONS.MULTIPLICATION)) {
+fun <T> multBy(multiplier: (a: T, b: T) -> T): Operator<T> = object : Operator<T>(setOf(MULTIPLICATION)) {
     override fun mult(a: T, b: T): T = multiplier(a, b)
 }
 
-fun <T> divBy(divider: (a: T, b: T) -> T): Operator<T> = object : Operator<T>(setOf(OPERATIONS.DIVISION)) {
+fun <T> divBy(divider: (a: T, b: T) -> T): Operator<T> = object : Operator<T>(setOf(DIVISION)) {
     override fun div(a: T, b: T): T = divider(a, b)
 }
 
-fun <T> mergeBy(merger: (a: T, b: T) -> T): Operator<T> = object : Operator<T>(setOf(OPERATIONS.MERGING)) {
+fun <T> mergeBy(merger: (a: T, b: T) -> T): Operator<T> = object : Operator<T>(setOf(MERGING)) {
     override fun merge(a: T, b: T): T = merger(a, b)
 }
 
@@ -29,20 +30,18 @@ fun <T> operateBy(
     div: Operator<T>? = null,
     merge: Operator<T>? = null,
 ): Operator<T> {
-    require(add == null || add.supports(Operator.OPERATIONS.ADDITION))
-    require(sub == null || sub.supports(Operator.OPERATIONS.SUBTRACTION))
-    require(mult == null || mult.supports(Operator.OPERATIONS.MULTIPLICATION))
-    require(div == null || div.supports(Operator.OPERATIONS.DIVISION))
-    require(merge == null || merge.supports(Operator.OPERATIONS.MERGING))
+    require(add == null || add.supports(ADDITION))
+    require(sub == null || sub.supports(SUBTRACTION))
+    require(mult == null || mult.supports(MULTIPLICATION))
+    require(div == null || div.supports(DIVISION))
+    require(merge == null || merge.supports(MERGING))
 
-    val supported = mutableSetOf<Operator.OPERATIONS>()
-
-    when {
-        add != null -> supported.add(Operator.OPERATIONS.ADDITION)
-        sub != null -> supported.add(Operator.OPERATIONS.SUBTRACTION)
-        mult != null -> supported.add(Operator.OPERATIONS.MULTIPLICATION)
-        div != null -> supported.add(Operator.OPERATIONS.DIVISION)
-        merge != null -> supported.add(Operator.OPERATIONS.MERGING)
+    val supported = buildSet {
+        if (add != null) add(ADDITION)
+        if (sub != null) add(SUBTRACTION)
+        if (mult != null) add(MULTIPLICATION)
+        if (div != null) add(DIVISION)
+        if (merge != null) add(MERGING)
     }
 
     return object : Operator<T>(supported) {
