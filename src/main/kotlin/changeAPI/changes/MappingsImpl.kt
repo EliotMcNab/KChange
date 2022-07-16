@@ -89,7 +89,9 @@ sealed class MappingsImpl<T>(
         Group(groupSize, this)
 
     /**
-     * Groups the elements in a [Change] into [Lists][List] of elements that match the given [filters]
+     * Groups the elements in a [Change] into [Lists][List] of elements that match the given [filters]. Groups are
+     * resolved in the order in which they are passed, so if for example an element satisfies more than 1 filter, _it
+     * will be grouped into the first filter by default_.
      *
      * ### _Example_
      * ```

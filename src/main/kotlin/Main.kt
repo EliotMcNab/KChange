@@ -1,6 +1,5 @@
 import changeAPI.RandomIntGenerator
 import changeAPI.changes.Change
-import comparisons.IntComparator
 
 fun main() {
 
